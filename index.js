@@ -54,7 +54,7 @@ async function findPreNotes(browser, preNotes, excludeNotes) {
             await page.waitForSelector('.btnBrowseLoan');
             await page.evaluate((type) => {
                 document.getElementsByClassName('btnBrowseLoan')[type].click()
-            },j)
+            }, j)
             await page.waitForSelector('.loaded');
             var foundNewNotes = await page.evaluate((preNoteLoanCodes, excludeNotes, j) => {
                 var notes = $('.browseLoanViewBoxContainer')
@@ -64,9 +64,9 @@ async function findPreNotes(browser, preNotes, excludeNotes) {
                     var loanCode = note.getElementsByClassName('loanCode')[0].innerText
                     var investBtn = note.getElementsByClassName('btnInvest')
                     if (!preNoteLoanCodes.includes(loanCode) && !investBtn.length && !excludeNotes.includes(loanCode)) {
-                        foundNewNotes.push({loanCode: loanCode, type: j})
+                        foundNewNotes.push({ loanCode: loanCode, type: j })
                     }
-                }                
+                }
 
                 return foundNewNotes
             }, preNoteLoanCodes, excludeNotes, j)
@@ -88,10 +88,12 @@ async function attemptInvest(browser, attemptNote) {
 
         await page.reload()
         await page.waitForSelector('.btnBrowseLoan');
-        await page.evaluate((type)=> {
-            document.getElementsByClassName('btnBrowseLoan')[type].click()
-        }, attemptNote.type)
-        await page.waitForSelector('.loaded');
+        if (attemptNote.type != "0") {
+            await page.evaluate((type) => {
+                document.getElementsByClassName('btnBrowseLoan')[type].click()
+            }, attemptNote.type)
+            await page.waitForSelector('.loaded');
+        }
 
         data = await page.evaluate((attemptLoanCode) => {
             var success = false;
