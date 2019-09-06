@@ -2,7 +2,9 @@ const puppeteer = require('puppeteer');
 const config = require('./config');
 
 async function run() {
-    let preNotes = ['MBBT-19060094'];
+    let preNotes = [];
+    let processedNotes = []
+    let excludeNotes = config.EXCLUDE_NOTES;
 
     var browser = await puppeteer.launch({ headless: false });
     var page = await browser.newPage();
@@ -17,8 +19,49 @@ async function run() {
         console.log(ex)
     }
 
+    preNotes = await findPreNotes(browser, preNotes, excludeNotes)
     preNotes.forEach(note => {
         attemptInvest(browser, note)
+    })
+    excludeNotes = excludeNotes.concat(preNotes)
+    preNotes = [];
+
+    //Find new notes every set minute interval
+    setInterval(async () => {
+        preNotes = await findPreNotes(browser, preNotes, excludeNotes)
+        preNotes.forEach(note => {
+            attemptInvest(browser, note)
+        })
+        excludeNotes = excludeNotes.concat(preNotes)
+        preNotes = [];
+    }, config.FIND_NEW_NOTES_MINUTE_INTERVAL * 60 * 1000)
+}
+
+async function findPreNotes(browser, preNotes, excludeNotes) {
+    return new Promise(async resolve => {
+        const page = await browser.newPage();
+        await page.goto(config.LOAN_URL)
+        await page.waitForSelector('.browseLoanViewBoxContainer');
+
+        var foundNewNotes = await page.evaluate((preNotes, excludeNotes) => {
+            var success = false;
+            var notes = $('.browseLoanViewBoxContainer')
+            var foundNewNotes = [];
+            for (var i = 0; i < notes.length; i++) {
+                var note = notes[i]
+                var loanCode = note.getElementsByClassName('loanCode')[0].innerText
+                var investBtn = note.getElementsByClassName('btnInvest')
+                if (!preNotes.includes(loanCode) && !investBtn.length && !excludeNotes.includes(loanCode)) {
+                    foundNewNotes.push(loanCode)
+                }
+            }
+
+            return foundNewNotes
+        }, preNotes, excludeNotes)
+
+        preNotes = preNotes.concat(foundNewNotes);
+        page.close();
+        resolve(preNotes)
     })
 }
 
@@ -33,7 +76,6 @@ async function attemptInvest(browser, attemptLoanCode) {
         data = await page.evaluate((attemptLoanCode) => {
             var success = false;
             var notes = $('.browseLoanViewBoxContainer')
-            var promises = [];
             for (var i = 0; i < notes.length; i++) {
                 var note = notes[i]
                 var loanCode = note.getElementsByClassName('loanCode')[0].innerText
@@ -54,7 +96,7 @@ async function attemptInvest(browser, attemptLoanCode) {
     if (data.success) {
         await page.waitForSelector('#amount')
         await page.type('#amount', '10');
-        await page.evaluate(()=> {
+        await page.evaluate(() => {
             document.getElementById('investment-form-submit').click()
         })
     }
