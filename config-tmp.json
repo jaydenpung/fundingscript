@@ -2,6 +2,7 @@
     "USERNAME": "my_username@email.com",
     "PASSWORD": "my_password",
     "EXCLUDE_NOTES": ["MBBT-19060094"],
+    "INVEST_AMOUNT": "100",
     "FIND_NEW_NOTES_MINUTES_INTERVAL": 30,
     "HIDE_BROWSER": true,
     "LOGIN_URL": "https://fundingsocieties.com.my/log-in",

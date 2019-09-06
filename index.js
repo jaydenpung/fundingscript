@@ -1,6 +1,13 @@
 const puppeteer = require('puppeteer');
 const config = require('./config');
 
+const LOG_PREFIX = ""
+const log = function () {
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift("[" + new Date().toLocaleString() + "]" + LOG_PREFIX + " ");
+    console.log.apply(console, args);
+}
+
 async function run() {
     let preNotes = [];
     let processedNotes = []
@@ -16,7 +23,7 @@ async function run() {
         await page.click('[name=log-in-form-submit]')
     }
     catch (ex) {
-        console.log(ex)
+        log(ex)
     }
 
     preNotes = await findPreNotes(browser, preNotes, excludeNotes)
@@ -71,6 +78,8 @@ async function attemptInvest(browser, attemptLoanCode) {
     var data = { success: false }
 
     while (!data.success) {
+        log('[WAIT] - ' + attemptLoanCode)
+
         await page.reload()
         await page.waitForSelector('.browseLoanViewBoxContainer');
         data = await page.evaluate((attemptLoanCode) => {
@@ -80,7 +89,6 @@ async function attemptInvest(browser, attemptLoanCode) {
                 var note = notes[i]
                 var loanCode = note.getElementsByClassName('loanCode')[0].innerText
                 var investBtn = note.getElementsByClassName('btnInvest')
-                console.log(attemptLoanCode)
                 if (investBtn.length && loanCode == attemptLoanCode) {
                     investBtn = investBtn[0]
                     investBtn.click();
@@ -90,16 +98,15 @@ async function attemptInvest(browser, attemptLoanCode) {
 
             return { success: success }
         }, attemptLoanCode)
-        console.log('wait')
     }
 
-    if (data.success) {
-        await page.waitForSelector('#amount')
-        await page.type('#amount', '10');
-        await page.evaluate(() => {
-            document.getElementById('investment-form-submit').click()
-        })
-    }
+    await page.waitForSelector('#amount')
+    await page.type('#amount', config.INVEST_AMOUNT);
+    await page.evaluate(() => {
+        document.getElementById('investment-form-submit').click()
+    })
+    log('[SUCCESS] - ' + attemptLoanCode)
+    await page.close()
 }
 
 run();
