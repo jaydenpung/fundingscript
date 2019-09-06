@@ -3,7 +3,7 @@
     "PASSWORD": "my_password",
     "EXCLUDE_NOTES": ["MBBT-19060094"],
     "FIND_NEW_NOTES_MINUTES_INTERVAL": 30,
-    "SHOW_BROWSER": false,
+    "HIDE_BROWSER": true,
     "LOGIN_URL": "https://fundingsocieties.com.my/log-in",
     "LOAN_URL": "https://fundingsocieties.com.my/admin-investor/browse-loan"
 }

@@ -6,7 +6,7 @@ async function run() {
     let processedNotes = []
     let excludeNotes = config.EXCLUDE_NOTES;
 
-    var browser = await puppeteer.launch({ headless: false });
+    var browser = await puppeteer.launch({ headless: config.HIDE_BROWSER });
     var page = await browser.newPage();
     try {
         await page.goto(config.LOGIN_URL);
