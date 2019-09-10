@@ -82,7 +82,7 @@ async function findPreNotes(browser, preNotes, excludeNotes) {
 
 async function attemptInvest(browser, attemptNote) {
     const page = await browser.newPage();
-    await page.goto(config.LOAN_URL)
+    await page.goto(config.LOAN_URL, {waitUntil: 'load', timeout: 0})
     var data = { success: false }
 
     while (!data.success) {
