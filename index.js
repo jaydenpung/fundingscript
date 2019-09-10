@@ -82,6 +82,7 @@ async function findPreNotes(browser, preNotes, excludeNotes) {
 
 async function attemptInvest(browser, attemptNote) {
     const page = await browser.newPage();
+    await page.setDefaultNavigationTimeout(0); 
     await page.goto(config.LOAN_URL, {waitUntil: 'load', timeout: 0})
     var data = { success: false }
 
@@ -89,12 +90,12 @@ async function attemptInvest(browser, attemptNote) {
         log('[WAIT] - ' + attemptNote.loanCode + ' [type] -' + attemptNote.type)
 
         await page.reload()
-        await page.waitForSelector('.btnBrowseLoan');
+        await page.waitForSelector('.btnBrowseLoan', {timeout: 0});
         if (attemptNote.type != "0") {
             await page.evaluate((type) => {
                 document.getElementsByClassName('btnBrowseLoan')[type].click()
             }, attemptNote.type)
-            await page.waitForSelector('.loaded');
+            await page.waitForSelector('.loaded', {timeout: 0});
         }
 
         data = await page.evaluate((attemptLoanCode) => {
