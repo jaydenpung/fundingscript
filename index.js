@@ -28,7 +28,9 @@ async function run() {
 
     preNotes = await findPreNotes(browser, preNotes, excludeNotes)
     preNotes.forEach(note => {
-        attemptInvest(browser, note)
+        for (var i = 0; i < config.TAB_COUNT; i++) {
+            attemptInvest(browser, note)
+        }
         excludeNotes.push(note.loanCode)
     })
     preNotes = [];
@@ -84,7 +86,7 @@ async function attemptInvest(browser, attemptNote) {
     var data = { success: false }
 
     while (!data.success) {
-        log('[WAIT] - ' + attemptNote.loanCode + 'type-' + attemptNote.type)
+        log('[WAIT] - ' + attemptNote.loanCode + ' [type] -' + attemptNote.type)
 
         await page.reload()
         await page.waitForSelector('.btnBrowseLoan');
