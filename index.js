@@ -28,10 +28,16 @@ async function run() {
 
     preNotes = await findPreNotes(browser, preNotes, excludeNotes)
     preNotes.forEach(note => {
+        var initiated = false;
         for (var i = 0; i < config.TAB_COUNT; i++) {
-            attemptInvest(browser, note)
+            if (excludeNotes.length < config.MAX_CONCURRENT_ATTEMPT) {
+                attemptInvest(browser, note);
+                initiated = true;
+            }
         }
-        excludeNotes.push(note.loanCode)
+        if (initiated) {
+            excludeNotes.push(note.loanCode)
+        }
     })
     preNotes = [];
 
@@ -82,20 +88,20 @@ async function findPreNotes(browser, preNotes, excludeNotes) {
 
 async function attemptInvest(browser, attemptNote) {
     const page = await browser.newPage();
-    await page.setDefaultNavigationTimeout(0); 
-    await page.goto(config.LOAN_URL, {waitUntil: 'load', timeout: 0})
+    await page.setDefaultNavigationTimeout(0);
+    await page.goto(config.LOAN_URL, { waitUntil: 'load', timeout: 0 })
     var data = { success: false }
 
     while (!data.success) {
         log('[WAIT] - ' + attemptNote.loanCode + ' [type] -' + attemptNote.type)
 
         await page.reload()
-        await page.waitForSelector('.btnBrowseLoan', {timeout: 0});
+        await page.waitForSelector('.btnBrowseLoan', { timeout: 0 });
         if (attemptNote.type != "0") {
             await page.evaluate((type) => {
                 document.getElementsByClassName('btnBrowseLoan')[type].click()
             }, attemptNote.type)
-            await page.waitForSelector('.loaded', {timeout: 0});
+            await page.waitForSelector('.loaded', { timeout: 0 });
         }
 
         data = await page.evaluate((attemptLoanCode) => {
@@ -117,7 +123,7 @@ async function attemptInvest(browser, attemptNote) {
         }, attemptNote.loanCode)
     }
 
-    await page.waitForSelector('#amount')
+    await page.waitForSelector('#amount', { timeout: 0 })
     await page.type('#amount', config.INVEST_AMOUNT);
     await page.evaluate(() => {
         document.getElementById('investment-form-submit').click()

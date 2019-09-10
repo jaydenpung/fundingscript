@@ -5,6 +5,7 @@
     "INVEST_AMOUNT": "100",
     "FIND_NEW_NOTES_MINUTES_INTERVAL": 30,
     "TAB_COUNT": 1,
+    "MAX_CONCURRENT_ATTEMPT": 5,
     "HIDE_BROWSER": true,
     "LOGIN_URL": "https://fundingsocieties.com.my/log-in",
     "LOAN_URL": "https://fundingsocieties.com.my/admin-investor/browse-loan"
